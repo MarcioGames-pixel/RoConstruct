@@ -41,6 +41,13 @@ jobs:
             --source workspace/rebuild/2008-06 \
             --report wasm-portability-report.json
 
+      - name: Audit the real G3D RenderDevice contract
+        run: |
+          python workspace/rebuild/2008-06/wasm/renderdevice_portability.py \
+            --source 2008-06 \
+            --json renderdevice-portability-report.json \
+            --markdown renderdevice-portability-report.md
+
       - name: Install Emscripten SDK
         uses: mymindstorm/setup-emsdk@v14
         with:
