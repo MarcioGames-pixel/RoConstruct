@@ -1,0 +1,93 @@
+name: 2008-06 full client (WebAssembly)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - work
+    paths:
+      - "workspace/rebuild/2008-06/**"
+      - "2008-06/**"
+      - ".github/workflows/wasm-2008-06.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wasm-2008-06-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-wasm:
+    name: Build complete 2008-06 client with Emscripten
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout maintained source
+        uses: actions/checkout@v4
+        with:
+          ref: work
+          fetch-depth: 1
+
+      - name: Install Emscripten SDK
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: 4.0.10
+          actions-cache-folder: emsdk-cache
+
+      - name: Verify WebAssembly build project exists
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_DIR="workspace/rebuild/2008-06"
+
+          echo "Canonical native source: ${SOURCE_DIR}"
+          echo "Emscripten: $(emcc --version | head -n 1)"
+          echo "CMake: $(cmake --version | head -n 1)"
+
+          if [[ ! -d "${SOURCE_DIR}" ]]; then
+            echo "::error::Canonical source directory is missing: ${SOURCE_DIR}"
+            exit 1
+          fi
+
+          if [[ ! -f "${SOURCE_DIR}/CMakeLists.txt" ]]; then
+            echo "::error title=No WebAssembly build target::The 2008-06 tree does not yet contain a CMakeLists.txt for the full client. The recovered project currently uses the Windows/MSVC RoConstruct rebuild recipes. Port the client entry point and platform dependencies to an Emscripten-compatible CMake target before this workflow can produce a real client."
+            echo "This job deliberately stops instead of compiling an arbitrary subset and publishing a misleading .wasm artifact."
+            exit 1
+          fi
+
+      - name: Configure full client for WebAssembly
+        shell: bash
+        run: |
+          set -euo pipefail
+          emcmake cmake -S workspace/rebuild/2008-06 -B build/wasm \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_EXECUTABLE_SUFFIX=.html
+
+      - name: Compile full client
+        run: cmake --build build/wasm --parallel 2
+
+      - name: Verify WebAssembly outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t wasm_files < <(find build/wasm -type f -name '*.wasm' -size +0c)
+          if (( ${#wasm_files[@]} == 0 )); then
+            echo "::error::The build completed without producing a non-empty .wasm file."
+            exit 1
+          fi
+          printf 'WebAssembly output: %s\n' "${wasm_files[@]}"
+
+      - name: Upload WebAssembly build
+        uses: actions/upload-artifact@v4
+        with:
+          name: roblox-2008-06-wasm
+          path: |
+            build/wasm/**/*.wasm
+            build/wasm/**/*.js
+            build/wasm/**/*.html
+            build/wasm/**/*.data
+          if-no-files-found: error
+          retention-days: 14
