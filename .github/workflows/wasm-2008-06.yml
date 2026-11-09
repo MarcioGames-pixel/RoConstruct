@@ -53,6 +53,7 @@ jobs:
           set -euo pipefail
           mkdir -p build/wasm-host
           em++ workspace/rebuild/2008-06/wasm/browser_host.cpp \
+            workspace/rebuild/2008-06/wasm/webgl2_device.cpp \
             -O2 -std=c++17 \
             -sUSE_WEBGL2=1 \
             -sMIN_WEBGL_VERSION=2 \
