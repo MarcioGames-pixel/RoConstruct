@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RoConstruct 2008-06 — WebAssembly host test</title>
+  <style>
+    html, body { margin: 0; min-height: 100%; background: #101827; color: #e5edf7; font: 14px system-ui, sans-serif; }
+    main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+    canvas { display: block; width: 100%; aspect-ratio: 16 / 9; background: #080e18; border: 1px solid #52627a; }
+    p { line-height: 1.5; color: #bdc9d9; }
+    code { color: #9dd6ff; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>RoConstruct — browser host prototype</h1>
+    <canvas id="canvas" oncontextmenu="event.preventDefault()" tabindex="0"></canvas>
+    <p>This verifies the Emscripten + WebGL 2 browser host only. It is not yet the playable 2008 Roblox client.</p>
+    <p>Click the canvas and press a key to test browser input. Open the developer console for event messages.</p>
+  </main>
+  {{{ SCRIPT }}}
+</body>
+</html>
