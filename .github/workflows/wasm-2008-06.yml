@@ -103,6 +103,8 @@ jobs:
           name: roblox-2008-06-wasm
           path: |
             wasm-portability-report.json
+            renderdevice-portability-report.json
+            renderdevice-portability-report.md
             build/wasm-host/
             build/wasm-client/
           if-no-files-found: warn
