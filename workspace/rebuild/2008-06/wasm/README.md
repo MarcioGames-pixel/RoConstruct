@@ -17,6 +17,20 @@ It does not yet link G3D 6.09, RenderLib, AppDraw, or the recovered RbxView code
 It does not load RBX places, instantiate the 2008 engine, run Lua, connect to
 a game server, or provide gameplay. Do not label its output as a playable client.
 
+## G3D RenderDevice port contract
+
+The actual G3D 6.09 API and its Roblox RenderLib call sites have now been
+audited. See [RENDERDEVICE_PORT.md](RENDERDEVICE_PORT.md) and the
+`renderdevice_portability.py` report generator. The recovered
+`G3D::RenderDevice` has no virtual methods, so a derived WebGL class cannot
+replace the concrete pointer used by `RbxView` and `RenderScene`. The next
+real integration step must add a backend seam inside RenderDevice (or refactor
+it behind a stable interface) while preserving the native OpenGL path.
+
+The workflow generates `renderdevice-portability-report.json` and
+`renderdevice-portability-report.md` to track the exact legacy GL calls and
+RenderLib method contract.
+
 ## Current native source state
 
 The recovered source tree is maintained in `workspace/rebuild/2008-06`.
